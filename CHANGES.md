@@ -61,7 +61,7 @@ main (Integrante 1: C-01)
 ---
 
 ### [C-04] `c-04-listado-y-pruebas` — Integrante 4 (rama `feat/c-04-listado-y-pruebas` desde `feat/c-03-crud-y-ajustes` → merge final a `main`)
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado en `openspec/changes/archive/2026-11-15-c-04-listado-y-pruebas`)
 - **Dependencias**: `C-03`
 - **Scope**:
   - `app/modules/insumos/service.py` y `router.py`: `GET /insumos/` paginado, filtrable (`unidad`, `bajo_minimo`, `activo`) antes de contar (`RN-11`), ordenable contra lista blanca (`RN-12`) y validación de rango de página (`RN-10`, Opción A).

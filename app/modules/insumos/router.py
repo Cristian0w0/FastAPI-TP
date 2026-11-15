@@ -1,20 +1,27 @@
 """Rutas HTTP para operaciones CRUD individuales y ajustes de stock de insumos."""
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
 from app.core.database import InsumosDB, get_db
-from app.modules.insumos.models import ConflictoInsumoError, Insumo
+from app.modules.insumos.models import (
+    ConflictoInsumoError,
+    Insumo,
+    PaginaFueraDeRangoError,
+    Unidad,
+)
 from app.modules.insumos.schemas import (
     AjusteCreate,
     InsumoCreate,
     InsumoPublic,
     InsumoUpdate,
+    Pagina,
 )
 from app.modules.insumos.service import (
     actualizar_insumo,
     ajustar_stock_insumo,
     crear_insumo,
     eliminar_insumo,
+    listar_insumos,
     obtener_insumo,
 )
 
@@ -29,6 +36,34 @@ def _asegurar_encontrado(insumo: Insumo | None) -> Insumo:
             detail="Insumo no encontrado.",
         )
     return insumo
+
+
+@router.get("/", response_model=Pagina)
+async def listar(
+    page: int = Query(default=1, ge=1),
+    size: int = Query(default=20, ge=1, le=100),
+    sort: str | None = Query(default=None, pattern=r"^-?(nombre|stock|creado_en)$"),
+    unidad: Unidad | None = Query(default=None),
+    bajo_minimo: bool | None = Query(default=None),
+    activo: bool | None = Query(default=None),
+    db: InsumosDB = Depends(get_db),
+) -> dict[str, object]:
+    """Lista insumos paginados, filtrables antes de contar y ordenables contra lista blanca."""
+    try:
+        return listar_insumos(
+            db,
+            page=page,
+            size=size,
+            sort=sort,
+            unidad=unidad,
+            bajo_minimo=bajo_minimo,
+            activo=activo,
+        )
+    except PaginaFueraDeRangoError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(exc),
+        ) from exc
 
 
 @router.get("/{insumo_id}", response_model=InsumoPublic)

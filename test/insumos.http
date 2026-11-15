@@ -1,0 +1,195 @@
+# Suite secuencial de casos mínimos (C-01 a C-16) + defensas 2.13 (Ejercicio 8)
+# Ejecutar en este orden exacto con el servidor recién arrancado (`uvicorn app.main:app --reload`)
+
+@baseUrl = http://127.0.0.1:8000
+
+### C-01 · ID no entero en ruta
+# Esperado: 422 Unprocessable Entity (sin ejecutar el handler)
+GET {{baseUrl}}/insumos/abc
+
+### C-02 · Insumo inexistente
+# Esperado: 404 Not Found con detail
+GET {{baseUrl}}/insumos/99
+
+### C-03 · Consulta de insumo existente sin exponer dato interno
+# Esperado: 200 OK (Mozzarella, stock "3.500", bajo_minimo true, sin codigo_proveedor)
+GET {{baseUrl}}/insumos/2
+
+### C-04 · Alta de ejemplo con nombre sucio y codigo_proveedor
+# Esperado: 201 Created, header Location: /insumos/7, nombre "Queso rallado", bajo_minimo false, sin codigo_proveedor
+POST {{baseUrl}}/insumos/
+Content-Type: application/json
+
+{
+  "nombre": "  Queso   rallado  ",
+  "unidad": "kg",
+  "stock": "2.250",
+  "stock_minimo": "1.000",
+  "codigo_proveedor": "QUE-0007"
+}
+
+### C-05 · Alta de insumo por unidad con decimal en stock (RN-04 en modelo)
+# Esperado: 422 Unprocessable Entity (del validador de modelo)
+POST {{baseUrl}}/insumos/
+Content-Type: application/json
+
+{
+  "nombre": "Tapas de empanada",
+  "unidad": "unidad",
+  "stock": "12.5"
+}
+
+### C-06 · Múltiples errores simultáneos en el alta
+# Esperado: 422 Unprocessable Entity con los 3 errores (nombre, unidad, stock) en la misma respuesta
+POST {{baseUrl}}/insumos/
+Content-Type: application/json
+
+{
+  "nombre": "",
+  "unidad": "docena",
+  "stock": -1
+}
+
+### C-07 · Alta con campo de servidor prohibido (RN-06, extra="forbid")
+# Esperado: 422 Unprocessable Entity
+POST {{baseUrl}}/insumos/
+Content-Type: application/json
+
+{
+  "id": 99,
+  "nombre": "Pimienta",
+  "unidad": "g"
+}
+
+### C-08 · Actualización parcial (solo stock_minimo)
+# Esperado: 200 OK (cambia stock_minimo de Harina 000 a "15.000"; el resto queda intacto)
+PATCH {{baseUrl}}/insumos/1
+Content-Type: application/json
+
+{
+  "stock_minimo": "15.000"
+}
+
+### C-09 (parte 1) · Borrar codigo_proveedor con null en PATCH (RN-07)
+# Esperado: 200 OK (borra codigo_proveedor internamente, sin exponerlo)
+PATCH {{baseUrl}}/insumos/1
+Content-Type: application/json
+
+{
+  "codigo_proveedor": null
+}
+
+### C-09 (parte 2) · Enviar nombre en null en PATCH (RN-07)
+# Esperado: 422 Unprocessable Entity
+PATCH {{baseUrl}}/insumos/1
+Content-Type: application/json
+
+{
+  "nombre": null
+}
+
+### C-10 · Intentar modificar stock en PATCH (RN-06, extra="forbid")
+# Esperado: 422 Unprocessable Entity
+PATCH {{baseUrl}}/insumos/1
+Content-Type: application/json
+
+{
+  "stock": "10.000"
+}
+
+### C-11 (parte 1) · Comando de ajuste válido sobre Mozzarella (RN-08)
+# Esperado: 200 OK con stock actualizado de "3.500" a "2.250"
+POST {{baseUrl}}/insumos/2/ajustes
+Content-Type: application/json
+
+{
+  "cantidad": "-1.250",
+  "motivo": "consumo"
+}
+
+### C-11 (parte 2) · Ajuste que dejaría stock negativo sobre Mozzarella (RN-09)
+# Esperado: 409 Conflict sin modificar el stock ("2.250" intacto)
+POST {{baseUrl}}/insumos/2/ajustes
+Content-Type: application/json
+
+{
+  "cantidad": "-5.000",
+  "motivo": "consumo"
+}
+
+### C-12 · Ajuste con decimales sobre Huevos (unidad="unidad", RN-04 en service)
+# Esperado: 409 Conflict sin modificar el stock ("60" intacto)
+POST {{baseUrl}}/insumos/4/ajustes
+Content-Type: application/json
+
+{
+  "cantidad": "-0.5",
+  "motivo": "merma"
+}
+
+### C-13 · Listado filtrado por bajo_minimo antes de contar (RN-11)
+# Esperado: 200 OK con total 2 (Mozzarella y Sal fina), sin codigo_proveedor en items
+GET {{baseUrl}}/insumos/?bajo_minimo=true
+
+### C-14 · Ordenamiento por campo fuera de la lista blanca (RN-12)
+# Esperado: 422 Unprocessable Entity
+GET {{baseUrl}}/insumos/?sort=codigo_proveedor
+
+### C-15 · Página más allá de la última (RN-10)
+# Esperado: 422 Unprocessable Entity
+GET {{baseUrl}}/insumos/?page=9
+
+### C-16 (parte 1) · Borrar el insumo 6 por primera vez
+# Esperado: 204 No Content sin cuerpo
+DELETE {{baseUrl}}/insumos/6
+
+### C-16 (parte 2) · Borrar el insumo 6 por segunda vez
+# Esperado: 404 Not Found
+DELETE {{baseUrl}}/insumos/6
+
+### C-16 (parte 3) · Nuevo alta tras borrar el 6 (los IDs no se reutilizan)
+# Esperado: 201 Created con id 8 (no reutiliza 6; 7 fue Queso rallado en C-04) y header Location: /insumos/8
+POST {{baseUrl}}/insumos/
+Content-Type: application/json
+
+{
+  "nombre": "Orégano seco",
+  "unidad": "g",
+  "stock": "150.000",
+  "stock_minimo": "50.000"
+}
+
+### Defensa 2.13 · Listado filtrado por unidad y ordenado descendente por stock sin dato interno
+# Defensas adicionales de la sección 2.13 (Ejercicio 8)
+# Esperado: 200 OK, ordenado descendente por stock (Harina 000 antes que Mozzarella/Queso) y sin codigo_proveedor
+GET {{baseUrl}}/insumos/?unidad=kg&sort=-stock
+
+### Defensa 2.13 · Filtro con unidad fuera de enumeración
+# Esperado: 422 Unprocessable Entity
+GET {{baseUrl}}/insumos/?unidad=docena
+
+### Defensa 2.13 · Intentar cambiar unidad en PATCH (RN-06)
+# Esperado: 422 Unprocessable Entity
+PATCH {{baseUrl}}/insumos/1
+Content-Type: application/json
+
+{
+  "unidad": "g"
+}
+
+### Defensa 2.13 · RN-04 en PATCH sobre unidad="unidad" (service -> 409)
+# Esperado: 409 Conflict
+PATCH {{baseUrl}}/insumos/4
+Content-Type: application/json
+
+{
+  "stock_minimo": "35.5"
+}
+
+### Defensa 2.13 · Filtro sin resultados en página 1 (RN-10 Opción A)
+# Esperado: 200 OK con items [], total 0, page 1, pages 0
+GET {{baseUrl}}/insumos/?unidad=ml&page=1
+
+### Defensa 2.13 · Filtro sin resultados en página 2 (RN-10 Opción A)
+# Esperado: 422 Unprocessable Entity
+GET {{baseUrl}}/insumos/?unidad=ml&page=2
