@@ -38,7 +38,7 @@ main (Integrante 1: C-01)
 ---
 
 ### [C-02] `c-02-schemas-validaciones` — Integrante 2 (rama `feat/c-02-schemas-validaciones` desde `main`)
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado en `openspec/changes/archive/2026-11-15-c-02-schemas-validaciones`)
 - **Dependencias**: `C-01`
 - **Scope**:
   - `app/modules/insumos/schemas.py`: `InsumoCreate`, `InsumoUpdate`, `AjusteCreate`, `InsumoPublic`, `Pagina`, validadores `RN-01` a `RN-08`, `extra="forbid"`, `Decimal` en texto y enteros para `unidad == "unidad"`.
