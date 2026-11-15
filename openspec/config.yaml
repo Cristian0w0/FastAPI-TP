@@ -1,0 +1,27 @@
+schema: spec-driven
+
+context: |
+  Proyecto académico UTN Programación III — Unidad FastAPI: "Los insumos de la cocina".
+  Stack obligatorio: Python >= 3.12, FastAPI >= 0.111 (todos los handlers con async def), Pydantic 2 y Uvicorn.
+  Persistencia exclusivamente en memoria (lista + contador de IDs en app.state.db via lifespan y Depends(get_db)).
+  Fuera de alcance: no hay base de datos SQL, no hay autenticación ni formato de error RFC 9457 (usar HTTPException y detail).
+  Separación de capas obligatoria: app/modules/insumos/service.py NO debe importar nada de HTTP ni usar HTTPException; comunica problemas devolviendo None o lanzando excepciones propias del dominio.
+  Cantidades exactas con Decimal (nunca float), serializadas en JSON como texto; para unidad == "unidad" se rechazan decimales y se normaliza a Decimal entero.
+  Escribir todos los artefactos OpenSpec, especificaciones, docstrings y comentarios en español.
+
+rules:
+  proposal:
+    - Indicar claramente qué entra en el change y qué queda explícitamente fuera de alcance.
+  specs:
+    - Referenciar las reglas de negocio RN-01 a RN-12 y los casos mínimos C-01 a C-16 que correspondan.
+  tasks:
+    - Dividir en tareas pequeñas, verificables con pytest -v o uvicorn.
+
+operations:
+  apply:
+    guidance:
+      - Respetar la estructura obligatoria de archivos definida en TP_Cap2_Consigna.pdf.
+      - Verificar tests con pytest -v antes de dar por completado el change.
+  archive:
+    guidance:
+      - Verificar openspec validate y actualizar CHANGES.md marcando [x] el change archivado.
