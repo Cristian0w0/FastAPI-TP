@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.core.database import crear_base_inicial
+from app.modules.insumos.router import router as insumos_router
 
 
 @asynccontextmanager
@@ -21,4 +22,4 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Integrante 3 (C-03): importar y registrar insumos_router aquí con app.include_router(insumos_router)
+app.include_router(insumos_router)

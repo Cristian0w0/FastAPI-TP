@@ -49,7 +49,7 @@ main (Integrante 1: C-01)
 ---
 
 ### [C-03] `c-03-crud-y-ajustes` — Integrante 3 (rama `feat/c-03-crud-y-ajustes` desde `feat/c-02-schemas-validaciones`)
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado en `openspec/changes/archive/2026-11-15-c-03-crud-y-ajustes`)
 - **Dependencias**: `C-02`
 - **Scope**:
   - `app/modules/insumos/service.py`: funciones puras (sin HTTP) para `obtener_insumo`, `crear_insumo`, `actualizar_insumo` (`exclude_unset=True`, borrado de `codigo_proveedor`, `RN-04` -> `ConflictoInsumoError`), `ajustar_stock_insumo` (`RN-04` y `RN-09` -> `ConflictoInsumoError` sin mutar) y `eliminar_insumo` (sin reutilizar IDs).
