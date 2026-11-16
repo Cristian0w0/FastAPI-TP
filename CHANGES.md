@@ -38,7 +38,7 @@ main (Integrante 1: C-01)
 ---
 
 ### [C-02] `c-02-schemas-validaciones` — Integrante 2 (rama `feat/c-02-schemas-validaciones` desde `main`)
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado en `openspec/changes/archive/2026-11-15-c-02-schemas-validaciones`)
 - **Dependencias**: `C-01`
 - **Scope**:
   - `app/modules/insumos/schemas.py`: `InsumoCreate`, `InsumoUpdate`, `AjusteCreate`, `InsumoPublic`, `Pagina`, validadores `RN-01` a `RN-08`, `extra="forbid"`, `Decimal` en texto y enteros para `unidad == "unidad"`.
@@ -49,7 +49,7 @@ main (Integrante 1: C-01)
 ---
 
 ### [C-03] `c-03-crud-y-ajustes` — Integrante 3 (rama `feat/c-03-crud-y-ajustes` desde `feat/c-02-schemas-validaciones`)
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado en `openspec/changes/archive/2026-11-15-c-03-crud-y-ajustes`)
 - **Dependencias**: `C-02`
 - **Scope**:
   - `app/modules/insumos/service.py`: funciones puras (sin HTTP) para `obtener_insumo`, `crear_insumo`, `actualizar_insumo` (`exclude_unset=True`, borrado de `codigo_proveedor`, `RN-04` -> `ConflictoInsumoError`), `ajustar_stock_insumo` (`RN-04` y `RN-09` -> `ConflictoInsumoError` sin mutar) y `eliminar_insumo` (sin reutilizar IDs).
@@ -61,7 +61,7 @@ main (Integrante 1: C-01)
 ---
 
 ### [C-04] `c-04-listado-y-pruebas` — Integrante 4 (rama `feat/c-04-listado-y-pruebas` desde `feat/c-03-crud-y-ajustes` → merge final a `main`)
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado en `openspec/changes/archive/2026-11-15-c-04-listado-y-pruebas`)
 - **Dependencias**: `C-03`
 - **Scope**:
   - `app/modules/insumos/service.py` y `router.py`: `GET /insumos/` paginado, filtrable (`unidad`, `bajo_minimo`, `activo`) antes de contar (`RN-11`), ordenable contra lista blanca (`RN-12`) y validación de rango de página (`RN-10`, Opción A).
